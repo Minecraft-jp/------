@@ -311,10 +311,11 @@
                             <button onclick="shareVideo()" class="flex items-center gap-1.5 px-4 py-2.5 bg-brandBg border border-brandBorder hover:border-brandAccent active:scale-95 transition-all rounded-full text-xs font-bold text-brandText shadow-md">
                                 <i data-lucide="share-2" class="w-4 h-4 text-blue-400"></i><span>共有する</span>
                             </button>
-                            <!-- mp4抽出型ダウンロードボタン -->
-                            <button id="downloadBtn" onclick="downloadVideo()" class="flex items-center gap-1.5 px-4 py-2.5 bg-brandBg border border-brandBorder hover:border-brandAccent active:scale-95 transition-all rounded-full text-xs font-bold text-brandText shadow-md">
+                            
+                            <!-- <a href="" download=""> 形式の直接ダウンロードボタン -->
+                            <a id="downloadBtn" href="" download="" target="_blank" onclick="showToast('📥 ダウンロードを開始します')" class="flex items-center gap-1.5 px-4 py-2.5 bg-brandBg border border-brandBorder hover:border-brandAccent active:scale-95 transition-all rounded-full text-xs font-bold text-brandText shadow-md">
                                 <i data-lucide="download" class="w-4 h-4 text-green-400"></i><span id="downloadBtnText">ダウンロード</span>
-                            </button>
+                            </a>
                         </div>
                     </div>
                     <div class="p-4 bg-brandBg rounded-2xl text-sm leading-relaxed border border-brandBorder">
@@ -434,44 +435,6 @@
             <div id="watchLaterListContainer" class="overflow-y-auto flex-grow py-4 space-y-3 scrollbar-thin"></div>
             <div class="pt-3 border-t border-brandBorder flex-shrink-0">
                 <button onclick="closeWatchLaterModal()" class="w-full py-2.5 bg-brandBg border border-brandBorder hover:border-brandAccent text-brandText rounded-xl text-xs font-bold transition-all">閉じる</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- フォールバック用ダウンロード解説モーダル -->
-    <div id="downloadModal" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 hidden">
-        <div id="downloadModalContainer" class="bg-brandSurface border border-brandBorder rounded-theme max-w-md w-full max-h-[85vh] flex flex-col p-6 shadow-2xl">
-            <div class="flex justify-between items-center pb-3 border-b border-brandBorder flex-shrink-0">
-                <h3 class="text-lg font-bold text-brandText flex items-center gap-2"><i data-lucide="info" class="text-brandAccent"></i><span>直接ダウンロードできない場合</span></h3>
-                <button onclick="closeModal()" class="text-brandMuted hover:text-brandText transition-colors p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="overflow-y-auto flex-grow py-4 pr-1 space-y-4 scrollbar-thin">
-                <p class="text-xs text-brandMuted">外部サーバーのアクセス制限等により直接DLが開始されない場合は、以下をお試しください。</p>
-                <div class="space-y-3">
-                    <details class="group bg-brandBg rounded-2xl border border-brandBorder overflow-hidden" open>
-                        <summary class="flex justify-between items-center p-4 cursor-pointer select-none hover:bg-brandSurface transition-colors">
-                            <span class="text-sm font-black text-brandText flex items-center gap-2"><i data-lucide="smartphone" class="w-4 h-4 text-blue-400"></i>iPhone</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-brandMuted transition-transform duration-200 group-open:rotate-180"></i>
-                        </summary>
-                        <div class="p-4 border-t border-brandBorder text-xs text-brandMuted space-y-3 leading-relaxed">
-                            <p>1. 「<a id="iphoneDirectLink" href="#" target="_blank" class="gradient underline font-bold">動画ファイルへ直アクセスカット</a>」を押して新しいタブで開く</p>
-                            <p>2. 共有メニューから「ファイルに保存」を選択してください。</p>
-                        </div>
-                    </details>
-                    <details class="group bg-brandBg rounded-2xl border border-brandBorder overflow-hidden">
-                        <summary class="flex justify-between items-center p-4 cursor-pointer select-none hover:bg-brandSurface transition-colors">
-                            <span class="text-sm font-black text-brandText flex items-center gap-2"><i data-lucide="smartphone" class="w-4 h-4 text-green-400"></i>Android</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-brandMuted transition-transform duration-200 group-open:rotate-180"></i>
-                        </summary>
-                        <div class="p-4 border-t border-brandBorder text-xs text-brandMuted space-y-3 leading-relaxed">
-                            <p>1. 「<a id="androidDirectLink" href="#" target="_blank" class="gradient underline font-bold">直リンクを開く</a>」をタップ</p>
-                            <p>2. 長押しして「動画をダウンロード」を選択</p>
-                        </div>
-                    </details>
-                </div>
-            </div>
-            <div class="pt-3 border-t border-brandBorder flex-shrink-0">
-                <button onclick="closeModal()" class="w-full py-3 bg-brandBg border border-brandBorder hover:border-brandAccent active:scale-95 transition-all text-brandText rounded-xl text-xs font-bold">閉じる</button>
             </div>
         </div>
     </div>
@@ -923,8 +886,7 @@
                     const matchedTags = line.match(/([#＃][^\s#＃]+)/g);
                     if (matchedTags) return `<span class="hashtag-container-gradient">${matchedTags.join(' ')}</span>`;
                 }
-                return line;
-            }).join('<br>');
+                return line;}).join('<br>');
         }
 
         function loadVideo(id) {
@@ -937,6 +899,16 @@
             
             player.playbackRate = appConfig.playbackRate;
             player.loop = appConfig.loop;
+
+            // ダウンロード用 <a> タグの href と download 属性を自動更新
+            const downloadBtn = document.getElementById("downloadBtn");
+            if (downloadBtn) {
+                downloadBtn.href = v.url;
+                // ファイル名の拡張子を取得 (例: .mp4)
+                const extMatch = v.url.match(/\.(mp4|mov|webm)$/i);
+                const ext = extMatch ? extMatch[0] : '.mp4';
+                downloadBtn.download = `${v.title.replace(/[\/\\?%*:|"<>]/g, '_')}${ext}`;
+            }
             
             vTitle.textContent = v.title;
             vDate.textContent = `公開日: ${v.date}`;
@@ -974,67 +946,6 @@
                 showToast("🔗 リンクをコピーしました！");
             }
         }
-
-        // MP4ファイルの個別抽出・ダウンロード処理
-        async function downloadVideo() {
-            const v = videos.find(item => item.id === activeId);
-            if (!v) return;
-            const btn = document.getElementById("downloadBtn");
-            const txt = document.getElementById("downloadBtnText");
-            btn.disabled = true; 
-            txt.textContent = "準備中...";
-            
-            try {
-                const res = await fetch(v.url, { mode: 'cors' });
-                if (!res.ok) throw new Error("ネットワーク応答エラー");
-                
-                const len = +res.headers.get('Content-Length');
-                const reader = res.body.getReader();
-                let rec = 0, chunks = [];
-                
-                while(true) {
-                    const {done, value} = await reader.read();
-                    if (done) break;
-                    chunks.push(value); 
-                    rec += value.length;
-                    if (len) {
-                        txt.textContent = `${Math.round((rec / len) * 100)}%`;
-                    } else {
-                        txt.textContent = "抽出中...";
-                    }
-                }
-                
-                const blob = new Blob(chunks, { type: "video/mp4" });
-                const blobUrl = URL.createObjectURL(blob);
-                const a = document.createElement("a"); 
-                a.href = blobUrl; 
-                
-                // URLからファイル名を抽出し、なければデフォルト名を割り当て
-                const extMatch = v.url.match(/\.(mp4|mov|webm)$/i);
-                const ext = extMatch ? extMatch[0] : '.mp4';
-                a.download = `${v.title.replace(/[\/\\?%*:|"<>]/g, '_')}${ext}`;
-                
-                document.body.appendChild(a); 
-                a.click(); 
-                document.body.removeChild(a);
-                
-                setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-                showToast("✅ ダウンロードを開始しました");
-            } catch (e) {
-                // セキュリティ制限（CORSエラー）などで直接抽出できない場合は解説モーダルをフォールバック開く
-                openDownloadModal(v.url);
-            } finally {
-                btn.disabled = false; 
-                txt.textContent = "ダウンロード";
-            }
-        }
-
-        function openDownloadModal(url) {
-            document.getElementById("downloadModal").classList.remove("hidden");
-            document.getElementById("iphoneDirectLink").href = url;
-            document.getElementById("androidDirectLink").href = url;
-        }
-        function closeModal() { document.getElementById("downloadModal").classList.add("hidden"); }
 
         function renderPlaylist() {
             playlistContainer.innerHTML = "";
